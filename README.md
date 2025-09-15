@@ -27,7 +27,7 @@ pip install -e .
 
 ## Example
 
-[!WARNING]
+[!NOTE]
 This code is designed for the specific setup described in both reports. It is composed of a Keysight AWG model M8195A, a National Instruments PXI with ports 4462 and 4461, and a Danfysik Magnet. The reservoir itself is composed of spin-orbit torque magnetic tunnel junctions supplied by IMEC in Belgium. For the complete setup, go check the [technical report](technical_report.pdf).
 
 
@@ -46,5 +46,5 @@ Instead of handpicking the hyperparameters, you can run optuna studies with 'opt
 
 The playground directory contains a bunch of loose scripts used for side quests.
 
-[!WARNING]
+[!NOTE]
 If you want to use 'datasets.py' or the optuna scripts, you need to install keras and optuna.
