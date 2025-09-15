@@ -1,10 +1,13 @@
+"""
+This is a draft, along with super_fast_optuna, regrouping every module from the package to get an even faster code. This code showed some success upon few trials. 
+The main idea is to open every task in the beginning and closing them only at the end of the experiment and not at the end of each switching probability.
+"""
+import os
+import pyvisa
 import time
 import numpy as np
 import nidaqmx
 from nidaqmx.constants import AcquisitionType, TerminalConfiguration
-import os
-import numpy as np
-import pyvisa
 
 def super_fast(t_quantized, V_max, forward_ratio, X_train, n_features):
     #################### Initialize PXI ####################

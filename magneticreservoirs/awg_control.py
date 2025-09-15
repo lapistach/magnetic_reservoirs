@@ -1,8 +1,11 @@
-#!/usr/bin/env python3
 """
 AWG Control Module
 
 Handles pulse generation and waveform upload for dual-channel AWG operation.
+The pulses can be created by the create_pulse_sequence function. 
+They can be uploaded in specific segments of the AWG by the upload_waveform function. 
+They can be sent into specific channels of the AWG by the send_waveform function.
+The upload and send can be used independently of the creation.
 """
 
 import os
@@ -15,7 +18,7 @@ class AWG:
     """AWG control for pulse generation using file-based approach."""
     
     def __init__(self, address: str = "TCPIP0::localhost::inst0::INSTR", 
-                 sample_rate: float = 64e9, timeout: int = 60000): # one minute timeout for timeout errors
+                 sample_rate: float = 64e9, timeout: int = 60000): # one minute timeout to bypass timeout errors
         """
         Initialize AWG controller.
         
@@ -25,6 +28,8 @@ class AWG:
             VISA address of the AWG
         sample_rate : float
             Sample rate in Hz
+        timeout : int
+            AWG instructions timeout in ms
         """
         self.rm = pyvisa.ResourceManager()
         self.awg = self.rm.open_resource(address)
@@ -34,9 +39,12 @@ class AWG:
         
         
     def _setup_awg(self):
-        """Configure AWG for dual-channel operation."""
+        """Configure AWG for dual-channel operation in channel 1 and 4 of the AWG. 
+           Polarity is normal to get same polarity between channels by default and continuous mode is off to enable single shots.
+           Replace the factory reste *RST with *CLS, it clears errors but doesn't reset, better if timeout errors occur.
+        """
         self.awg.write("*RST")
-        #self.awg.write("*CLS")  # Clear any errors but don't reset
+        #self.awg.write("*CLS")
         self.awg.write(f":SOUR:FREQ:RAST {int(self.sample_rate)}")
         self.awg.write(":INST:DACM DUAL")
         self.awg.write(":INST:MEM:EXT:RDIV DIV2")
@@ -135,7 +143,7 @@ class AWG:
             
     def send_waveform(self, segment: int):
         """
-        Send waveform with optimized triggering.
+        Send waveform with both channels triggering at the same time. The SEL command is to select the wanted segment.
         
         Parameters
         ----------

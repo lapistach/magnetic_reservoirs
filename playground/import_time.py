@@ -1,3 +1,6 @@
+"""
+This module shows the actual time taken by the program for sleep times. These values are helpful when compared to switching dynamics and instrument speed.
+"""
 import time
 tq = 0. # Example value for tq
 start = time.perf_counter()

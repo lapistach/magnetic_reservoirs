@@ -1,16 +1,14 @@
+"""
+This module runs the experiment detailed in the report, using the magneticreservoirs package, for prediction of data with a single MTJ.
+"""
 import os
 import numpy as np
-import magnet_control
-import experiment_control
-import close_connections
-from memory_array import memory_array
-import helper_functions as hf
 import datasets as ds
-from output_layer import prediction_linear_regression 
+import magneticreservoirs as mr
+import magneticreservoirs.helper_functions as hf
+from magneticreservoirs.output_layer import prediction_linear_regression 
 
-def main():
-   
-    file_path = r"Y:\SOT_lab\People\Dashiell\fast_codes_folder\PS_pred"  # you must create the folders before writing the path
+def main(dir_path):
 
     ######### Create a dataset ########
     training_datapoints = 100
@@ -19,7 +17,7 @@ def main():
 
     ######### Experiment architecture ########
     mem_array = np.array([[1., 0.], [0., 1.]])  # Memory coefficients. The two entries are two parameters A and B. 
-    memstack = memory_array(memory_coefficients=mem_array)  # Instantiate the memory array
+    memstack = mr.memory_array(memory_coefficients=mem_array)  # Instantiate the memory array
     psw = memstack.psw_init()
     psw_list_train = [psw]  # Initialize the list of training switching probabilities
     pseudo_inverse = prediction_linear_regression(n_features=len(psw))  # Instantiate the prediction model
@@ -43,14 +41,14 @@ def main():
 
     ######## Apply magnetic field ########
     B_x = 1.5 # in A
-    # magnet = magnet_control.Danfysik7000()
-    # magnet.rampToCurrent(B_x)
+    magnet = mr.Danfysik7000()
+    magnet.rampToCurrent(B_x)
 
     ######## Instantiate the experiment model ########
-    controller = experiment_control.psw_control(low_to_high, resistance_measurement_technique)
+    controller = mr.psw_control(low_to_high, resistance_measurement_technique)
 
     ######## Run the experiment : get all the training data first then all the testing data ########
-    newpath = file_path + "\\experiment_data"
+    newpath = dir_path + "\\experiment_data"
     if not os.path.exists(newpath):
         os.makedirs(newpath)
 
@@ -78,7 +76,7 @@ def main():
             counter += 1
             if counter > 100:
                 counter = 0
-                awg = experiment_control.AWG()
+                awg = mr.AWG()
                 awg.close()
         psw_list_train.append(psw)
     pseudo_inverse.train(datapoints[:training_datapoints], psw_list_train)  # Train the linear regression model
@@ -110,18 +108,18 @@ def main():
             counter += 1
             if counter > 100:
                 counter = 0
-                awg = experiment_control.AWG()
+                awg = mr.AWG()
                 awg.close()
         psw_list_test.append(psw)
         pred = pseudo_inverse.predict([psw])  # Predict the next data point
         predicted_datapoints.append(pred)
-    awg = experiment_control.AWG()
+    awg = mr.AWG()
     awg.close()
-    # close_connections.cleanup_setup()
+    # mr.cleanup_setup()
 
     mse, mae, rmse, mape = hf.prediction_scores(datapoints[training_datapoints:], predicted_datapoints)  # Get the prediction scores
 
-    output_layer_path = file_path + "\\output_layer"
+    output_layer_path = dir_path + "\\output_layer"
     if not os.path.exists(output_layer_path):
         os.makedirs(output_layer_path)
 
@@ -190,9 +188,10 @@ def main():
 
     # Optional: Copy the current file to the data folder
     with open(__file__, "r") as src:
-        name = file_path + "\\code_copy.py"
+        name = dir_path + "\\code_copy.py"
         with open(name, "w") as tgt:
             tgt.write(src.read())
 
 if __name__ == "__main__":
-    main()
+    dir_path = r"path/to/results/dir" # you must create the folders before writing the path
+    main(dir_path)

@@ -1,15 +1,17 @@
+"""
+This module runs the experiment detailed in the report, using the magneticreservoirs package, for classification of data with several MTJs.
+It relies on the run_for_one_mtj module.
+"""
 import os
 import numpy as np
 import datasets as ds
-import helper_functions as hf
-from output_layer import classifier_linear_regression, classifier_ridge_regression
 from sklearn.model_selection import train_test_split
-import run_for_one_mtj 
+from run_for_one_mtj import runner_for_one_neuron
+from magneticreservoirs.output_layer import classifier_linear_regression, classifier_ridge_regression
+import magneticreservoirs.helper_functions as hf
 
 
-def main():
-    
-    file_path = r"Y:\SOT_lab\People\Dashiell\fast_codes_folder\periodic_class"  # Create the folders before writing the path
+def main(dir_path):
 
     samples_number = 24
     test_ratio = 0.2
@@ -36,7 +38,7 @@ def main():
                 "neuron no10": [],
                 }
     
-    file_directory = file_path + "\\list_of_mtjs.dat"
+    file_directory = dir_path + "\\list_of_mtjs.dat"
     with open(file_directory, "w") as file:
         for key, value in list_of_mtjs.items():
             file.write(f"{key}: {value}\n")
@@ -49,7 +51,7 @@ def main():
     for i in range(n_neurons):
         if not list_of_mtjs["neuron no{}".format(i+1)]:
             continue
-        psw_training, psw_testing = run_for_one_mtj.runner_for_one_neuron(file_path, X_train, X_test, 
+        psw_training, psw_testing = runner_for_one_neuron(dir_path, X_train, X_test, 
                                                                                           psw_train, psw_test, n_features, i, 
                                                                                           B_x = list_of_mtjs["neuron no{}".format(i+1)][0], 
                                                                                           t_quantized = list_of_mtjs["neuron no{}".format(i+1)][1], 
@@ -75,7 +77,7 @@ def main():
 
     n_features = n_features * n_neurons  # Update the number of features after adding them for each neuron
 
-    output_layer_path = file_path + "\\output_layer"
+    output_layer_path = dir_path + "\\output_layer"
     if not os.path.exists(output_layer_path):
         os.makedirs(output_layer_path)
 
@@ -214,9 +216,10 @@ def main():
 
 # Optional: Copy the current file to the data folder
     with open(__file__, "r") as src:
-        name = file_path + "\\master_code_copy.py"
+        name = dir_path + "\\master_code_copy.py"
         with open(name, "w") as tgt:
             tgt.write(src.read())
 
 if __name__ == "__main__":
-    main()
+    dir_path = r"path/to/results/dir" # you must create the folders before writing the path
+    main(dir_path)

@@ -1,20 +1,13 @@
-#!/usr/bin/env python3
 """
 MTJ Control System - Main Control Module
 
 Main control routine integrating AWG pulse generation and PXI resistance
 measurement for MTJ device experiments.
 
-Performance Optimizations:
-- PXI measurement duration reduced from 0.1s to 0.03s (~2.7x speed improvement)
-- Reduced oversampling for faster data acquisition
-- Combined SCPI commands for AWG efficiency
-- Optimized measurement logic: 2.2 avg measurements per trial (vs 3-4 previously)
-- Minimal logging for reduced overhead
-
-The r_low is real r_low + 10% of value, needed to get a 3x faster PXI
-resistance measurement.
+The r_low is a resistance value that can clearly discriminate between r_high and r_low.
+The ressitance measurement technique and the r_low value can be chosen with the resistance_comparison.py file.
 """
+
 import numpy as np
 import time
 from typing import List
@@ -27,6 +20,16 @@ import threading
 class psw_control:
 
     def __init__(self, low_to_high: bool = True, resistance_measurement_technique: str = 'lock_in_fast'):
+        """
+        Initialize the experiment.
+        
+        Parameters
+        ----------
+        low_to_high : bool
+            True if the switching of the MTJ is determined by it going from low to high resistance. In our case, from P to AP.
+        resistance_measurement_technique : str
+            Resistance measurement method with the PXI, can be chosen in the resistance comparison file.
+        """
         self.low_to_high = low_to_high
         self.r_meas = resistance_measurement_technique
 
@@ -46,7 +49,7 @@ class psw_control:
         - 1 measurement: Initial resistance check
         - +1 measurement: Post-reset verification (only if reset needed)
         - 1 measurement: Final switching detection
-        - Average: 2.2 measurements per trial (vs 3-4 previously)
+        - Average: 2.2 measurements per trial
         
         Parameters
         ----------
@@ -71,7 +74,6 @@ class psw_control:
         ch4_reset_amplitude_factor : float
             Amplitude scaling factor for channel 4 reset pulses
         """
-        # Initialize instruments
         awg = AWG()
 
         if self.r_meas == 'lock_in_fast':

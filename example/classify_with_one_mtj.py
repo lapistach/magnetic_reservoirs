@@ -1,17 +1,16 @@
+"""
+This module runs the experiment detailed in the report, using the magneticreservoirs package, for classification of data with a single MTJ.
+"""
 import os
 import numpy as np
-import magnet_control
-import experiment_control
-import close_connections
 import datasets as ds
-import helper_functions as hf
-from output_layer import classifier_linear_regression, classifier_ridge_regression
 from sklearn.model_selection import train_test_split
-from add_filter import add_filter
+import magneticreservoirs as mr
+import magneticreservoirs.helper_functions as hf
+from magneticreservoirs.output_layer import classifier_linear_regression, classifier_ridge_regression
 
-def main():
 
-    file_path = r"Y:\SOT_lab\People\Dashiell\fast_codes_folder\first_try_several_psw_38" # you must create the folders before writing the path
+def main(dir_path):
 
     ######## Create a dataset ########
     samples_number = 100
@@ -25,7 +24,7 @@ def main():
     filter_type = 'none' # 'none', 'average', 'short', 'long', 'sparse'
     X_train_before, psw_train = hf.add_features(X_train_before, n_features)
     X_test_before, psw_test = hf.add_features(X_test_before, n_features)
-    X_train, X_test = add_filter(file_path, X_train_before, X_test_before, filter_type=filter_type)
+    X_train, X_test = hf.add_filter(dir_path, X_train_before, X_test_before, filter_type=filter_type)
 
     ######## Experiment parameters ########
     reference_resistance = 100 # reference resistance for the PXI
@@ -46,14 +45,14 @@ def main():
 
     ######## Apply magnetic field ########
     B_x = -3.0 # in A
-    magnet = magnet_control.Danfysik7000()
+    magnet = mr.Danfysik7000()
     magnet.rampToCurrent(B_x)
 
     ######## Instantiate the experiment model ########
-    controller = experiment_control.psw_control(low_to_high, resistance_measurement_technique)
+    controller = mr.psw_control(low_to_high, resistance_measurement_technique)
 
     ######## Run the experiment : get all the training data first then all the testing data ########
-    newpath = file_path + "\\raw_data"
+    newpath = dir_path + "\\raw_data"
     if not os.path.exists(newpath):
         os.makedirs(newpath)
     ######## Run the experiment : get all the training data first then all the testing data ########
@@ -75,7 +74,7 @@ def main():
                                                             )
             counter += 1
             if counter % (10*n_features) == 0:  # Refresh AWG every 10 samples
-                awg = experiment_control.AWG()
+                awg = mr.AWG()
                 awg.close()
     for i in range(len(psw_test)):
         max_value = np.max(X_test[i]) 
@@ -94,11 +93,11 @@ def main():
                                                             )
             counter += 1
             if counter % (10*n_features) == 0:  # Refresh AWG every 10 samples 
-                awg = experiment_control.AWG()
+                awg = mr.AWG()
                 awg.close()
         
     ######## Close all connections ########
-    close_connections.cleanup_setup()
+    mr.cleanup_setup()
 
     output_layer_path = newpath + "\\output_layer"
     if not os.path.exists(output_layer_path):
@@ -240,9 +239,10 @@ def main():
 
     # Optional: Copy the current file to a new location
     with open(__file__, "r") as src:
-        name = file_path + "\\example_classifying_task_copy.py"
+        name = dir_path + "\\example_classifying_task_copy.py"
         with open(name, "w") as tgt:
             tgt.write(src.read())
             
 if __name__ == "__main__":
-   main()
+   dir_path = r"path/to/results/dir" # you must create the folders before writing the path
+   main(dir_path)

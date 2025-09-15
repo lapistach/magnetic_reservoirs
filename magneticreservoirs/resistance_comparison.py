@@ -2,14 +2,14 @@
 """
 PXI Measurement Precision Comparison Test
 
-This script compares the precision (standard deviation) of multiple resistance
-measurements using current fast PXI settings vs former accurate settings.
+This script compares the precision (standard deviation) and speed of multiple resistance
+measurements using 4 different PXI settings.
 
 Usage:
-- Takes 5 resistance measurements before pulse (both settings)
+- Takes 5 resistance measurements before pulse (all settings)
 - Sends one pulse sequence to the MTJ device  
-- Takes 5 resistance measurements after pulse (both settings)
-- Compares standard deviation and timing between settings
+- Takes 5 resistance measurements after pulse (all settings)
+- Compares standard deviation and speed between settings
 """
  
 import time
@@ -18,18 +18,16 @@ import numpy as np
 from typing import List, Tuple
 from awg_control import AWG
 from pxi_control import PXI_lock_in_fast, PXI_lock_in_accurate, PXI_Kreuken_accurate, PXI_Kreuken_fast
-# from magnet_control import Danfysik7000
+from magnet_control import Danfysik7000
 import close_connections
 
-#from PS_magnet9700_driver import Danfysik9700
-
 class PXIPrecisionComparator:
-    """Class to compare precision of current vs former PXI settings."""
+    """Class to compare precision and speed of 4 different PXI settings for resistance measurements."""
     
     def __init__(self):
         self.awg = AWG()
-        #self.magnet = Danfysik7000()
-        #self.magnetPS = Danfysik9700("COM5")
+        self.magnet = Danfysik7000()
+        
 
     def measure_resistance_multiple(self, method: str = "lock_in_fast", ref_resistance: float = 100,
                                    num_measurements: int = 5) -> Tuple[List[float], float, float, float]:
@@ -93,17 +91,17 @@ class PXIPrecisionComparator:
                                  ch4_amplitude_factor: float = 0.5,
                                  num_measurements: int = 5) -> dict:
         """
-        Compare precision of former vs current PXI settings.
+        Compare precision and speed of all 4 settings.
 
         Returns
         -------
         dict
-            Precision comparison results with standard deviations
+            Precision comparison results with standard deviations and timings.
         """
         try:
             # Set magnetic field
-            # self.magnet.rampToCurrent(magnetic_field)
-            # self.magnetPS.set_current(magnetic_field)
+            self.magnet.rampToCurrent(magnetic_field)
+            self.magnetPS.set_current(magnetic_field)
             # Create and upload waveform
             waveform, _ = self.awg.create_pulse_sequence(signal_array,
                                                         pulse_duration,
@@ -199,8 +197,6 @@ class PXIPrecisionComparator:
             print(f"  Total time: {lock_in_fast_time:.3f} s")
 
         finally:
-            self.awg.close()
-            # close_connections.cleanup_setup()
-            # self.magnetPS.set_current(0.0)  # Reset magnet current
+            close_connections.cleanup_setup()
 
 

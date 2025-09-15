@@ -11,7 +11,7 @@ NB : The streams of 01, 011 and 0011 are in the helper_functions.py file.
 import numpy as np
 from sklearn.datasets import load_digits # it is the skdigits dataset
 from sklearn.model_selection import train_test_split
-import helper_functions as hf
+import magneticreservoirs.helper_functions as hf
 from keras.datasets import mnist
 
 rng = np.random.default_rng(2025) # to always get the same dataset 

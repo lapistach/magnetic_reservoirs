@@ -1,15 +1,18 @@
+"""
+This module operates an optimized hyperparameters gridsearch with Optuna on several MTJ reservoir for classification tasks.
+"""
 import os
 import optuna
 import numpy as np
-import run_for_one_mtj 
 import datasets as ds
-import helper_functions as hf
-from output_layer import classifier_linear_regression, classifier_ridge_regression
 from sklearn.model_selection import train_test_split
 
-def main():
+import magneticreservoirs.helper_functions as hf
+from magneticreservoirs.output_layer import classifier_linear_regression, classifier_ridge_regression
+from run_for_one_mtj import runner_for_one_neuron 
 
-    file_path = r"Y:\SOT_lab\People\Dashiell\fast_codes_folder\optuna_periodic_class" # you must create the folders before writing the path
+def main(dir_path):
+
     study_name = 'periodic_class' # choose a study name
     n_trials = 1 # choose the number of trials of the study, can be interrupted and changed at any time
 
@@ -27,7 +30,7 @@ def main():
     def objective(trial):
         ######## Instantiate the new folder ########
         current_trial_number = trial.number
-        newpath = file_path + "\\trial{}".format({current_trial_number})
+        newpath = dir_path + "\\trial{}".format({current_trial_number})
         if not os.path.exists(newpath):
             os.makedirs(newpath)
             
@@ -69,7 +72,7 @@ def main():
         for i in range(n_neurons):
             if not list_of_mtjs["neuron no{}".format(i+1)]:
                 continue
-            psw_training, psw_testing = run_for_one_mtj.runner_for_one_neuron(newpath, X_train, X_test, 
+            psw_training, psw_testing = runner_for_one_neuron(newpath, X_train, X_test, 
                                                                                             psw_train, psw_test, n_features, i, 
                                                                                             B_x = list_of_mtjs["neuron no{}".format(i+1)][0], 
                                                                                             t_quantized = list_of_mtjs["neuron no{}".format(i+1)][1], 
@@ -232,14 +235,14 @@ def main():
         return np.mean(cv_accuracies)  # Return the mean accuracy of the cross-validation
     
     sampler = optuna.samplers.TPESampler() # choose your sampler, this one is the best one if you have categorical parameters
-    storage_name = "sqlite:///" + file_path + "\\{}.db".format(study_name)
+    storage_name = "sqlite:///" + dir_path + "\\{}.db".format(study_name)
     study = optuna.create_study(study_name=study_name, storage=storage_name, load_if_exists=True, sampler=sampler, direction="maximize")
     study.optimize(objective, n_trials=n_trials)
     trial = study.best_trial
     best_trial_number = trial.number 
 
     # Saving the study results
-    newpath = file_path + "\\study_results"
+    newpath = dir_path + "\\study_results"
     if not os.path.exists(newpath):
         os.makedirs(newpath)
     filedirectory = newpath + "\\"
@@ -287,9 +290,10 @@ def main():
 
     # Optional: Copy the current file to the data folder
     with open(__file__, "r") as src:
-        name = file_path + "\\code_copy.py"
+        name = dir_path + "\\code_copy.py"
         with open(name, "w") as tgt:
             tgt.write(src.read())
 
 if __name__ == "__main__":
-   main()
+   dir_path = r"path/to/results/dir" # you must create the folders before writing the path
+   main(dir_path)

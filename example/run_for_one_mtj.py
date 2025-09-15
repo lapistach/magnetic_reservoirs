@@ -1,9 +1,11 @@
+"""
+This module gets the switching probability for each data point of a whole dataset
+and is reused in the experiment using several MTJs as a reservoir.
+"""
 import os
 import numpy as np
-import magnet_control
-import experiment_control
-import close_connections
-from add_filter import add_filter
+import magneticreservoirs as mr
+import magneticreservoirs.helper_functions as hf
 
 def runner_for_one_neuron(file_path, X_train, X_test, psw_train, psw_test,
                           n_features, neuron_number, B_x, t_quantized, V_max, forward_ratio,
@@ -28,11 +30,11 @@ def runner_for_one_neuron(file_path, X_train, X_test, psw_train, psw_test,
 
     ######## Apply magnetic field ########
     B_x = B_x # in A
-    magnet = magnet_control.Danfysik7000()
+    magnet = mr.Danfysik7000()
     magnet.rampToCurrent(B_x)
 
     ######## Instantiate the experiment model ########
-    controller = experiment_control.psw_control(low_to_high, resistance_measurement_technique)
+    controller = mr.psw_control(low_to_high, resistance_measurement_technique)
 
     ######## Instantiate the new folder ########
     current_neuron_number = neuron_number
@@ -40,7 +42,7 @@ def runner_for_one_neuron(file_path, X_train, X_test, psw_train, psw_test,
     if not os.path.exists(newpath):
         os.makedirs(newpath)
 
-    X_train, X_test = add_filter(newpath, X_train, X_test, filter_type=filter_type)
+    X_train, X_test = hf.add_filter(newpath, X_train, X_test, filter_type=filter_type)
 
     ######## Run the experiment : get all the training data first then all the testing data ########
     counter = 0 # counter for refreshing the awg
@@ -66,7 +68,7 @@ def runner_for_one_neuron(file_path, X_train, X_test, psw_train, psw_test,
                                                             )
             counter += 1
             if counter % (10*n_features) == 0:  # Refresh AWG every 10 samples
-                awg = experiment_control.AWG()
+                awg = mr.AWG()
                 awg.close()
     for i in range(len(psw_test)):
         max_value = np.max(X_test[i])
@@ -90,11 +92,11 @@ def runner_for_one_neuron(file_path, X_train, X_test, psw_train, psw_test,
                                                             )
             counter += 1
             if counter % (10*n_features) == 0:  # Refresh AWG every 10 samples 
-                awg = experiment_control.AWG()
+                awg = mr.AWG()
                 awg.close()
         
     ######## Close all connections ########
-    close_connections.cleanup_setup()   
+    mr.cleanup_setup()   
     
     # Optional: Copy the current file to the data folder
     with open(__file__, "r") as src:

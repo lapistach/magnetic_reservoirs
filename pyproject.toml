@@ -1,7 +1,7 @@
 [project]
-name = "magnetic-reservoirs"
+name = "magneticreservoirs"
 version = "0.1.0"
-description = "Add your description here"
+description = "A package for reservoir computing with spin-orbit torque magnetic tunnel juntions."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
@@ -10,3 +10,11 @@ dependencies = [
     "pyvisa>=1.15.0",
     "scikit-learn>=1.7.1",
 ]
+
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["magneticreservoirs*"]
+exclude = ["example*", "playground*"]

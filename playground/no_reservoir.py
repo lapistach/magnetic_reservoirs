@@ -1,9 +1,13 @@
-import datasets as ds
-import helper_functions as hf
-from output_layer import classifier_linear_regression, classifier_ridge_regression
-import numpy as np
+"""
+This just computes the classification results without any reservoir.
+"""
 import os
+import datasets as ds
+import numpy as np
 from sklearn.model_selection import train_test_split
+
+import magneticreservoirs.helper_functions as hf
+from magneticreservoirs.output_layer import classifier_linear_regression, classifier_ridge_regression
 
 import time
 

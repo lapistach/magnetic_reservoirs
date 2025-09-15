@@ -1,14 +1,15 @@
+"""
+This is a draft, along with super_fast_trial, regrouping every module from the package to get an even faster code.
+"""
 import os
 import optuna
 import numpy as np
-import magnet_control
-import experiment_control
-import close_connections
 import datasets as ds
-import helper_functions as hf
-from add_filter import add_filter
-from output_layer import classifier_linear_regression, classifier_ridge_regression
 from sklearn.model_selection import train_test_split
+
+import magneticreservoirs as mr
+import magneticreservoirs.helper_functions as hf
+from magneticreservoirs.output_layer import classifier_linear_regression, classifier_ridge_regression
 from super_fast_trial import super_fast 
 
 def main():
@@ -39,7 +40,7 @@ def main():
 
         ######## Apply magnetic field ########
         B_x = B_x # in A
-        magnet = magnet_control.Danfysik7000()
+        magnet = mr.Danfysik7000()
         magnet.rampToCurrent(B_x)
 
         ######## Instantiate the new folder ########
@@ -54,7 +55,7 @@ def main():
         psw_total = np.array(psw_total)
         psw_total = psw_total.reshape(samples_number, n_features)
         ######## Close all connections ########
-        close_connections.cleanup_setup()
+        mr.cleanup_setup()
 
         output_layer_path = newpath + "\\output_layer"
         if not os.path.exists(output_layer_path):
