@@ -46,5 +46,5 @@ Instead of handpicking the hyperparameters, you can run optuna studies with 'opt
 
 The playground directory contains a bunch of loose scripts used for side quests.
 
-[!NOTE]
-If you want to use 'datasets.py' or the optuna scripts, you need to install keras and optuna.
+>[!NOTE]
+>If you want to use 'datasets.py' or the optuna scripts, you need to install keras and optuna.
