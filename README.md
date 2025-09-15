@@ -27,8 +27,8 @@ pip install -e .
 
 ## Example
 
-[!NOTE]
-This code is designed for the specific setup described in both reports. It is composed of a Keysight AWG model M8195A, a National Instruments PXI with ports 4462 and 4461, and a Danfysik Magnet. The reservoir itself is composed of spin-orbit torque magnetic tunnel junctions supplied by IMEC in Belgium. For the complete setup, go check the [technical report](technical_report.pdf).
+>[!WARNING]
+>This code is designed for the specific setup described in both reports. It is composed of a Keysight AWG model M8195A, a National Instruments PXI with ports 4462 and 4461, and a Danfysik Magnet. The reservoir itself is composed of spin-orbit torque magnetic tunnel junctions supplied by IMEC in Belgium. For the complete setup, go check the [technical report](technical_report.pdf).
 
 
 Once you have setup your MTJ correctly, you can test it quickly by running 'classify_with_one_mtj.py'. Don't forget to create an empty folder to store the results that you give to the main function.
