@@ -3,7 +3,7 @@
 A package for reservoir computing with spin-orbit torque magnetic tunnel juntions (MTJ). 
 This code is used as the interface between an AWG, a PXI and a magnet to send pulses to the MTJ and retrieve its reservoir state. You can also use it to train and test your own magnetic reservoir for classification and prediction tasks.
 
-This work was done during my master's project at the *Interface Physics and Magnetism* laboratory under the supervision of Prof. Pietro Gambardella between April 2025 and August 2025.
+This work was done during my master's project at the *Interface Physics and Magnetism* laboratory at ETH Zürich between April 2025 and August 2025.
 
 For more information, you can check my [master's report](masters_report.pdf) and my [technical report](technical_report.pdf).
 
